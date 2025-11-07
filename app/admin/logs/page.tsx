@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
-import { getSupabaseClient } from "@/lib/supabase/server"
+import { createClient } from "@/lib/supabase/server"
 import { isAdmin, getModerationLogs } from "@/lib/supabase/admin"
 import Header from "@/components/header"
 import AdminNav from "@/components/admin-nav"

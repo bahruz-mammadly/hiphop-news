@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
-import { getSupabaseClient } from "@/lib/supabase/server"
 import { isAdmin, getFlaggedContent } from "@/lib/supabase/admin"
+import { createClient } from "@/lib/supabase/server"
 import Header from "@/components/header"
 import AdminNav from "@/components/admin-nav"
 import FlaggedContentList from "@/components/flagged-content-list"

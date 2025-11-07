@@ -1,13 +1,10 @@
-"use server"
-
-import { cookies } from "next/headers"
-import { createServerClient } from "@supabase/ssr"
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 
 /**
- * Universal server-side Supabase client (App Router compatible)
  * Safe for Node.js and Edge runtimes.
  */
-export function createClient() {
+export async function createClient() {
   const cookieStore = cookies()
 
   return createServerClient(
@@ -19,21 +16,15 @@ export function createClient() {
           return cookieStore.get(name)?.value
         },
         set(name: string, value: string, options: any) {
-          try {
-            // Not all runtimes allow setting cookies here, ignore if restricted
-            cookieStore.set({ name, value, ...options })
-          } catch {
-            // Ignored for edge runtime or middleware context
-          }
+          cookieStore.set({ name, value, ...options })
         },
         remove(name: string, options: any) {
-          try {
-            cookieStore.delete({ name, ...options })
-          } catch {
-            // Ignored for restricted contexts
-          }
+          cookieStore.set({ name, value: '', ...options })
         },
       },
     }
   )
 }
+
+// Əgər köhnə fayllarda getSupabaseClient istifadə olunubsa:
+export const getSupabaseClient = createClient
