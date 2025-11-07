@@ -1,22 +1,39 @@
-import { createServerClient as createSupabaseClient } from "@supabase/ssr"
+"use server"
+
 import { cookies } from "next/headers"
+import { createServerClient } from "@supabase/ssr"
 
-export async function getSupabaseClient() {
-  const cookieStore = await cookies()
+/**
+ * Universal server-side Supabase client (App Router compatible)
+ * Safe for Node.js and Edge runtimes.
+ */
+export function createClient() {
+  const cookieStore = cookies()
 
-  return createSupabaseClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
-    cookies: {
-      getAll() {
-        return cookieStore.getAll()
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+        set(name: string, value: string, options: any) {
+          try {
+            // Not all runtimes allow setting cookies here, ignore if restricted
+            cookieStore.set({ name, value, ...options })
+          } catch {
+            // Ignored for edge runtime or middleware context
+          }
+        },
+        remove(name: string, options: any) {
+          try {
+            cookieStore.delete({ name, ...options })
+          } catch {
+            // Ignored for restricted contexts
+          }
+        },
       },
-      setAll(cookiesToSet) {
-        try {
-          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
-        } catch {
-          // The "setAll" method was called from a Server Component.
-          // This can be ignored if you have middleware refreshing user sessions.
-        }
-      },
-    },
-  })
+    }
+  )
 }
